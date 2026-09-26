@@ -48,7 +48,12 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.database import get_db, check_db_connection
+from app.database import (
+    get_db,
+    check_db_connection,
+    check_required_tables,
+    check_db_readiness,
+)
 from app.services.journey_service import (
     CustomerJourney,
     JourneySummary,
@@ -235,21 +240,33 @@ def health_check():
     "/api/ready",
     tags=["System"],
     summary="Readiness check",
-    description="Verifies database connectivity. Returns HTTP 200 if ready, HTTP 503 if unreachable.",
+    description="Verifies database connectivity and required tables. Returns HTTP 200 if ready, HTTP 503 if unreachable or tables missing.",
 )
 def readiness_check():
     """
-    Readiness probe verifying database connectivity.
-    Does NOT leak connection strings or internal exception details.
+    Readiness probe verifying database connectivity and required tables.
+    Does NOT leak connection strings, credentials, or internal exception details.
     """
-    if check_db_connection():
+    if not check_db_connection():
         return JSONResponse(
-            status_code=200,
-            content={"status": "ready", "database": "connected"},
+            status_code=503,
+            content={"status": "not_ready", "database": "disconnected"},
         )
+
+    tables_ok, _ = check_required_tables()
+    if not tables_ok:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status": "not_ready",
+                "database": "connected",
+                "message": "Required database tables are missing",
+            },
+        )
+
     return JSONResponse(
-        status_code=503,
-        content={"status": "not_ready", "database": "disconnected"},
+        status_code=200,
+        content={"status": "ready", "database": "connected"},
     )
 
 

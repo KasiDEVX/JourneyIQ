@@ -246,3 +246,18 @@ class TestHealthAndReadiness:
         # Must not expose database URLs or tracebacks
         assert "postgresql" not in response.text
         assert "sqlite" not in response.text
+
+    @patch("app.main.check_required_tables", return_value=(False, ["conversions"]))
+    @patch("app.main.check_db_connection", return_value=True)
+    def test_ready_endpoint_returns_503_when_tables_missing(self, mock_db, mock_tables):
+        response = client.get("/api/ready")
+        assert response.status_code == 503
+        data = response.json()
+        assert data["status"] == "not_ready"
+        assert "message" in data
+        assert "missing" in data["message"].lower()
+        # Must not expose database URLs, passwords, or tracebacks
+        assert "postgresql" not in response.text
+        assert "sqlite" not in response.text
+        assert "password" not in response.text.lower()
+

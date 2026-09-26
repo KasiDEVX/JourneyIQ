@@ -19,7 +19,7 @@ import os
 import logging
 from pathlib import Path
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, text, inspect
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.config import settings
 
@@ -29,6 +29,7 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BACKEND_DIR.parent
 DATA_DIR = PROJECT_ROOT / "data"
 DEFAULT_SQLITE_PATH = BACKEND_DIR / "journeyiq.db"
+REQUIRED_TABLES = frozenset({"customers", "campaigns", "events", "conversions"})
 
 
 def seed_sqlite_from_csv(sqlite_path: Path):
@@ -69,15 +70,35 @@ def seed_sqlite_from_csv(sqlite_path: Path):
         logger.exception("Failed to seed SQLite database: %s", e)
 
 
-def build_engine():
-    """Build SQLAlchemy engine with graceful SQLite fallback if primary DB is offline."""
-    url = settings.DATABASE_URL
+def build_engine(url: str | None = None, environment: str | None = None):
+    """
+    Build SQLAlchemy engine.
+    - If DATABASE_URL explicitly starts with sqlite://, allow SQLite only for local development.
+    - For PostgreSQL: create engine, test connection with SELECT 1, and raise original exception on failure.
+    - Automatic PostgreSQL -> SQLite fallback is strictly disallowed.
+    - ENVIRONMENT=production must never use or fall back to SQLite.
+    """
+    if url is None:
+        url = settings.DATABASE_URL
+    if environment is None:
+        environment = getattr(settings, "ENVIRONMENT", "development")
+
+    if not url:
+        raise ValueError("DATABASE_URL is not configured.")
+
+    url = url.strip()
 
     # Normalize legacy postgres:// scheme provided by some cloud hosts (Render, Heroku)
     if url.startswith("postgres://"):
         url = url.replace("postgres://", "postgresql://", 1)
 
-    if url.startswith("sqlite"):
+    if url.startswith("sqlite://") or url.startswith("sqlite:"):
+        if environment == "production":
+            raise ValueError(
+                "SQLite is not permitted in production environment. "
+                "A PostgreSQL DATABASE_URL is required."
+            )
+        logger.info("Explicit SQLite database configured for local development.")
         seed_sqlite_from_csv(DEFAULT_SQLITE_PATH)
         return create_engine(
             url,
@@ -85,31 +106,31 @@ def build_engine():
             echo=settings.DEBUG,
         )
 
-    # Try connecting to PostgreSQL
+    # For PostgreSQL and other primary databases
+    safe_host = url.split("@")[-1] if "@" in url else url
+    logger.info("Connecting to primary database (%s)...", safe_host)
+    pg_engine = create_engine(
+        url,
+        pool_pre_ping=True,
+        pool_size=settings.DB_POOL_SIZE,
+        max_overflow=settings.DB_MAX_OVERFLOW,
+        pool_timeout=settings.DB_POOL_TIMEOUT,
+        echo=settings.DEBUG,
+    )
     try:
-        pg_engine = create_engine(
-            url,
-            pool_pre_ping=True,
-            pool_size=settings.DB_POOL_SIZE,
-            max_overflow=settings.DB_MAX_OVERFLOW,
-            pool_timeout=settings.DB_POOL_TIMEOUT,
-            echo=settings.DEBUG,
-        )
         with pg_engine.connect() as conn:
             conn.execute(text("SELECT 1"))
-        logger.info("Connected to primary database: %s", url)
+        logger.info("Successfully connected to primary database (%s).", safe_host)
         return pg_engine
     except Exception as e:
-        logger.warning(
-            "Primary database connection failed (%s). Falling back to local SQLite data store.", e
+        logger.error(
+            "Primary database connection failed (%s): %s. "
+            "Automatic SQLite fallback is disabled.",
+            safe_host,
+            e,
         )
-        seed_sqlite_from_csv(DEFAULT_SQLITE_PATH)
-        sqlite_url = f"sqlite:///{DEFAULT_SQLITE_PATH.as_posix()}"
-        return create_engine(
-            sqlite_url,
-            connect_args={"check_same_thread": False},
-            echo=settings.DEBUG,
-        )
+        pg_engine.dispose()
+        raise
 
 
 # ─── Engine & Session factory ────────────────────────────────────────────────
@@ -151,14 +172,61 @@ def get_db():
         db.close()
 
 
-def check_db_connection() -> bool:
+def check_db_connection(target_engine=None) -> bool:
     """
-    Quick connectivity check used by the health endpoint.
-    Returns True if the database is reachable, False otherwise.
+    Quick connectivity check (SELECT 1).
+    Returns True if database is reachable, False otherwise.
     """
+    eng = target_engine or engine
     try:
-        with engine.connect() as conn:
+        with eng.connect() as conn:
             conn.execute(text("SELECT 1"))
         return True
-    except Exception:
+    except Exception as e:
+        logger.error("Database connection check failed: %s", e)
         return False
+
+
+def check_required_tables(target_engine=None) -> tuple[bool, list[str]]:
+    """
+    Verify that all required tables exist in the database:
+    customers, campaigns, events, conversions.
+
+    Returns:
+        tuple[bool, list[str]]: (True, []) if all required tables exist,
+        or (False, [missing_table_names]) if any are missing or if inspection fails.
+    """
+    eng = target_engine or engine
+    try:
+        inspector = inspect(eng)
+        existing_tables = set(inspector.get_table_names())
+        missing = sorted(list(REQUIRED_TABLES - existing_tables))
+        if missing:
+            logger.warning("Database missing required tables: %s", missing)
+            return False, missing
+        return True, []
+    except Exception as e:
+        logger.error("Failed to inspect database tables: %s", e)
+        return False, sorted(list(REQUIRED_TABLES))
+
+
+def check_db_readiness(target_engine=None) -> tuple[bool, str]:
+    """
+    Comprehensive readiness check verifying both database connectivity (SELECT 1)
+    and that all required tables (customers, campaigns, events, conversions) exist.
+
+    Returns:
+        tuple[bool, str]:
+          - (True, "connected") if reachable and all tables exist.
+          - (False, "disconnected") if unreachable.
+          - (False, "missing_tables") if connected but required tables are missing.
+    """
+    eng = target_engine or engine
+    if not check_db_connection(eng):
+        return False, "disconnected"
+
+    tables_ok, _ = check_required_tables(eng)
+    if not tables_ok:
+        return False, "missing_tables"
+
+    return True, "connected"
