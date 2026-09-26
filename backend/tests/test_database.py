@@ -82,6 +82,22 @@ class TestDatabaseEngineConfiguration:
             assert call_url.startswith("postgresql://")
             assert not call_url.startswith("postgres://")
 
+    def test_special_characters_in_password_normalized(self):
+        """Unencoded @ in password must be safely percent-encoded to %40."""
+        with patch("app.database.create_engine") as mock_create_engine:
+            mock_engine = MagicMock()
+            mock_create_engine.return_value = mock_engine
+            mock_conn = MagicMock()
+            mock_engine.connect.return_value.__enter__.return_value = mock_conn
+
+            raw_url = "postgresql://myuser:secret@123@aws-0-host.supabase.com:5432/mydb"
+            build_engine(url=raw_url, environment="development")
+            call_url = mock_create_engine.call_args[0][0]
+            assert "secret%40123" in call_url
+            assert "secret@123" not in call_url
+            assert "@aws-0-host.supabase.com:5432/mydb" in call_url
+
+
 
 class TestTableVerificationAndReadiness:
     """Tests for table inspection and readiness probe."""

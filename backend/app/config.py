@@ -15,12 +15,33 @@ imports `settings` from here. This ensures:
 """
 
 import os
+import urllib.parse
 from pathlib import Path
 from dotenv import load_dotenv
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BACKEND_DIR / ".env")
 load_dotenv()
+
+
+def _normalize_db_url(url: str) -> str:
+    """Normalize and safely URL-encode DATABASE_URL for SQLAlchemy."""
+    if not url:
+        return url
+    url = url.strip()
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+    if "://" in url:
+        prefix, rest = url.split("://", 1)
+        if "@" in rest:
+            last_at = rest.rfind("@")
+            creds = rest[:last_at]
+            host_part = rest[last_at + 1 :]
+            if ":" in creds:
+                user, password = creds.split(":", 1)
+                clean_pw = urllib.parse.quote_plus(urllib.parse.unquote_plus(password))
+                url = f"{prefix}://{user}:{clean_pw}@{host_part}"
+    return url
 
 
 class Settings:
@@ -31,10 +52,12 @@ class Settings:
     DEBUG: bool = os.getenv("DEBUG", "false").strip().lower() == "true"
 
     # Database
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL",
-        "postgresql://postgres:password@localhost:5432/journeyiq",
-    ).strip()
+    DATABASE_URL: str = _normalize_db_url(
+        os.getenv(
+            "DATABASE_URL",
+            "sqlite:///backend/journeyiq.db",
+        )
+    )
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "5"))
     DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "10"))
     DB_POOL_TIMEOUT: int = int(os.getenv("DB_POOL_TIMEOUT", "30"))

@@ -135,7 +135,10 @@ def load_events(conn, df: pd.DataFrame) -> int:
              :event_type, :page, :product_id, :device)
     """)
     rows = df_clean.to_dict(orient="records")
-    conn.execute(sql, rows)
+    batch_size = 500
+    for i in range(0, len(rows), batch_size):
+        chunk = rows[i : i + batch_size]
+        conn.execute(sql, chunk)
     return len(rows)
 
 

@@ -17,6 +17,7 @@ The actual table models will be added in Stage 2.
 
 import os
 import logging
+import urllib.parse
 from pathlib import Path
 import pandas as pd
 from sqlalchemy import create_engine, text, inspect
@@ -70,6 +71,34 @@ def seed_sqlite_from_csv(sqlite_path: Path):
         logger.exception("Failed to seed SQLite database: %s", e)
 
 
+def normalize_database_url(url: str) -> str:
+    """
+    Normalize DATABASE_URL for SQLAlchemy:
+    - Normalizes legacy postgres:// scheme to postgresql://.
+    - Safely percent-encodes special characters in user credentials (e.g. '@' in passwords).
+    """
+    if not url:
+        return url
+    url = url.strip()
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+
+    if url.startswith("sqlite://") or url.startswith("sqlite:"):
+        return url
+
+    if "://" in url:
+        prefix, rest = url.split("://", 1)
+        if "@" in rest:
+            last_at = rest.rfind("@")
+            creds = rest[:last_at]
+            host_part = rest[last_at + 1:]
+            if ":" in creds:
+                user, password = creds.split(":", 1)
+                clean_pw = urllib.parse.quote_plus(urllib.parse.unquote_plus(password))
+                url = f"{prefix}://{user}:{clean_pw}@{host_part}"
+    return url
+
+
 def build_engine(url: str | None = None, environment: str | None = None):
     """
     Build SQLAlchemy engine.
@@ -86,11 +115,7 @@ def build_engine(url: str | None = None, environment: str | None = None):
     if not url:
         raise ValueError("DATABASE_URL is not configured.")
 
-    url = url.strip()
-
-    # Normalize legacy postgres:// scheme provided by some cloud hosts (Render, Heroku)
-    if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql://", 1)
+    url = normalize_database_url(url)
 
     if url.startswith("sqlite://") or url.startswith("sqlite:"):
         if environment == "production":
