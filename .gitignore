@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg
+*.egg-info/
+dist/
+build/
+*.so
+.eggs/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Environment variables (NEVER commit real credentials)
+.env
+.env.*
+*.env
+!.env.example
+!**/.env.example
+
+# Node dependencies & frontend builds
+node_modules/
+dist/
+dist-ssr/
+build/
+backend/journeyiq.db
+*.sqlite
+*.sqlite3
+*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Data files (can be large; regenerate via script)
+data/*.csv
+data/*.parquet
+
+# Logs
+*.log
+logs/
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb

@@ -1,0 +1,236 @@
+{
+  "topModules": [
+    {
+      "path": "node_modules/react-dom/cjs/react-dom-client.production.js",
+      "sizeBytes": 529556,
+      "sizeKB": "517.14 KB"
+    },
+    {
+      "path": "node_modules/react-router/dist/development/chunk-OB3PAWPO.mjs",
+      "sizeBytes": 93094,
+      "sizeKB": "90.91 KB"
+    },
+    {
+      "path": "node_modules/recharts/es6/state/selectors/axisSelectors.js",
+      "sizeBytes": 46067,
+      "sizeKB": "44.99 KB"
+    },
+    {
+      "path": "node_modules/@reduxjs/toolkit/dist/redux-toolkit.modern.mjs",
+      "sizeBytes": 26658,
+      "sizeKB": "26.03 KB"
+    },
+    {
+      "path": "node_modules/decimal.js-light/decimal.js",
+      "sizeBytes": 25439,
+      "sizeKB": "24.84 KB"
+    },
+    {
+      "path": "src/components/journey-flow/JourneyFlowGraph.tsx",
+      "sizeBytes": 24573,
+      "sizeKB": "24.00 KB"
+    },
+    {
+      "path": "node_modules/recharts/es6/cartesian/Bar.js",
+      "sizeBytes": 24429,
+      "sizeKB": "23.86 KB"
+    },
+    {
+      "path": "src/pages/Journeys.tsx",
+      "sizeBytes": 23543,
+      "sizeKB": "22.99 KB"
+    },
+    {
+      "path": "node_modules/immer/dist/immer.mjs",
+      "sizeBytes": 20424,
+      "sizeKB": "19.95 KB"
+    },
+    {
+      "path": "node_modules/d3-time-format/src/locale.js",
+      "sizeBytes": 16829,
+      "sizeKB": "16.43 KB"
+    },
+    {
+      "path": "node_modules/recharts/es6/cartesian/CartesianAxis.js",
+      "sizeBytes": 16696,
+      "sizeKB": "16.30 KB"
+    },
+    {
+      "path": "node_modules/react/cjs/react.production.js",
+      "sizeBytes": 15999,
+      "sizeKB": "15.62 KB"
+    },
+    {
+      "path": "src/components/dashboard/CustomerJourneyFlow.tsx",
+      "sizeBytes": 15496,
+      "sizeKB": "15.13 KB"
+    },
+    {
+      "path": "src/pages/Attribution.tsx",
+      "sizeBytes": 14503,
+      "sizeKB": "14.16 KB"
+    },
+    {
+      "path": "node_modules/recharts/es6/chart/RechartsWrapper.js",
+      "sizeBytes": 14013,
+      "sizeKB": "13.68 KB"
+    }
+  ],
+  "packages": [
+    {
+      "package": "react-dom",
+      "sizeBytes": 536767,
+      "sizeKB": "524.19 KB"
+    },
+    {
+      "package": "recharts",
+      "sizeBytes": 509868,
+      "sizeKB": "497.92 KB"
+    },
+    {
+      "package": "src",
+      "sizeBytes": 207764,
+      "sizeKB": "202.89 KB"
+    },
+    {
+      "package": "react-router",
+      "sizeBytes": 93094,
+      "sizeKB": "90.91 KB"
+    },
+    {
+      "package": "es-toolkit",
+      "sizeBytes": 34293,
+      "sizeKB": "33.49 KB"
+    },
+    {
+      "package": "lucide-react",
+      "sizeBytes": 29248,
+      "sizeKB": "28.56 KB"
+    },
+    {
+      "package": "d3-scale",
+      "sizeBytes": 27643,
+      "sizeKB": "27.00 KB"
+    },
+    {
+      "package": "@reduxjs/toolkit",
+      "sizeBytes": 26658,
+      "sizeKB": "26.03 KB"
+    },
+    {
+      "package": "decimal.js-light",
+      "sizeBytes": 25439,
+      "sizeKB": "24.84 KB"
+    },
+    {
+      "package": "immer",
+      "sizeBytes": 20424,
+      "sizeKB": "19.95 KB"
+    },
+    {
+      "package": "d3-shape",
+      "sizeBytes": 20239,
+      "sizeKB": "19.76 KB"
+    },
+    {
+      "package": "d3-time-format",
+      "sizeBytes": 17759,
+      "sizeKB": "17.34 KB"
+    },
+    {
+      "package": "react",
+      "sizeBytes": 17246,
+      "sizeKB": "16.84 KB"
+    },
+    {
+      "package": "d3-time",
+      "sizeBytes": 11252,
+      "sizeKB": "10.99 KB"
+    },
+    {
+      "package": "d3-format",
+      "sizeBytes": 10422,
+      "sizeKB": "10.18 KB"
+    },
+    {
+      "package": "d3-color",
+      "sizeBytes": 10354,
+      "sizeKB": "10.11 KB"
+    },
+    {
+      "package": "scheduler",
+      "sizeBytes": 9252,
+      "sizeKB": "9.04 KB"
+    },
+    {
+      "package": "d3-array",
+      "sizeBytes": 7955,
+      "sizeKB": "7.77 KB"
+    },
+    {
+      "package": "redux",
+      "sizeBytes": 6665,
+      "sizeKB": "6.51 KB"
+    },
+    {
+      "package": "d3-interpolate",
+      "sizeBytes": 6392,
+      "sizeKB": "6.24 KB"
+    },
+    {
+      "package": "reselect",
+      "sizeBytes": 5816,
+      "sizeKB": "5.68 KB"
+    },
+    {
+      "package": "eventemitter3",
+      "sizeBytes": 5520,
+      "sizeKB": "5.39 KB"
+    },
+    {
+      "package": "react-redux",
+      "sizeBytes": 5385,
+      "sizeKB": "5.26 KB"
+    },
+    {
+      "package": "use-sync-external-store",
+      "sizeBytes": 5313,
+      "sizeKB": "5.19 KB"
+    },
+    {
+      "package": "d3-path",
+      "sizeBytes": 3231,
+      "sizeKB": "3.16 KB"
+    },
+    {
+      "package": "react-is",
+      "sizeBytes": 1981,
+      "sizeKB": "1.93 KB"
+    },
+    {
+      "package": "internmap",
+      "sizeBytes": 1171,
+      "sizeKB": "1.14 KB"
+    },
+    {
+      "package": "victory-vendor",
+      "sizeBytes": 1063,
+      "sizeKB": "1.04 KB"
+    },
+    {
+      "package": "clsx",
+      "sizeBytes": 661,
+      "sizeKB": "0.65 KB"
+    },
+    {
+      "package": "redux-thunk",
+      "sizeBytes": 408,
+      "sizeKB": "0.40 KB"
+    },
+    {
+      "package": "tiny-invariant",
+      "sizeBytes": 204,
+      "sizeKB": "0.20 KB"
+    }
+  ]
+}

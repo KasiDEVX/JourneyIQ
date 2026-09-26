@@ -1,0 +1,28 @@
+# JourneyIQ Render Blueprint Specification
+# Defines the web service deployment on Render with ASGI uvicorn runner.
+services:
+  - type: web
+    name: journeyiq-api
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: "pip install -r backend/requirements.txt"
+    startCommand: "uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: "/api/health"
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        sync: false  # Must be provided by managed PostgreSQL instance
+      - key: CORS_ORIGINS
+        sync: false  # Must match deployed frontend origin (e.g. https://<app>.vercel.app)
+      - key: ALLOWED_HOSTS
+        sync: false  # e.g. journeyiq-api.onrender.com
+      - key: DB_POOL_SIZE
+        value: "5"
+      - key: DB_MAX_OVERFLOW
+        value: "10"
+      - key: DB_POOL_TIMEOUT
+        value: "30"

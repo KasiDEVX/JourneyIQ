@@ -1,0 +1,3 @@
+# backend/app/services/__init__.py
+# This empty file makes 'services' a Python sub-package of 'app'.
+# It allows: from app.services.journey_service import ...
