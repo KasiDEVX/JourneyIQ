@@ -121,6 +121,26 @@ export async function getJourneyPatterns(limit: number = 20): Promise<JourneyPat
   return request<JourneyPattern[]>(`/api/analytics/journeys?limit=${encodeURIComponent(limit)}`);
 }
 
+export interface CustomerProfile {
+  customer_id: string;
+  first_seen: string;
+  converted: boolean;
+  conversion_revenue: number | null;
+  event_count: number;
+}
+
+export async function getCustomers(
+  limit: number = 50,
+  search?: string,
+  converted?: boolean
+): Promise<CustomerProfile[]> {
+  const params = new URLSearchParams();
+  params.set('limit', String(limit));
+  if (search) params.set('search', search);
+  if (converted !== undefined) params.set('converted', String(converted));
+  return request<CustomerProfile[]>(`/api/customers?${params.toString()}`);
+}
+
 export async function getCustomerJourney(customerId: string): Promise<CustomerJourney> {
   return request<CustomerJourney>(`/api/customers/${encodeURIComponent(customerId)}/journey`);
 }

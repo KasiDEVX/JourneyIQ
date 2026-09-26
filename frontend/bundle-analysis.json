@@ -16,6 +16,11 @@
       "sizeKB": "44.99 KB"
     },
     {
+      "path": "src/pages/Customers.tsx",
+      "sizeBytes": 32431,
+      "sizeKB": "31.67 KB"
+    },
+    {
       "path": "node_modules/@reduxjs/toolkit/dist/redux-toolkit.modern.mjs",
       "sizeBytes": 26658,
       "sizeKB": "26.03 KB"
@@ -37,8 +42,8 @@
     },
     {
       "path": "src/pages/Journeys.tsx",
-      "sizeBytes": 23543,
-      "sizeKB": "22.99 KB"
+      "sizeBytes": 23313,
+      "sizeKB": "22.77 KB"
     },
     {
       "path": "node_modules/immer/dist/immer.mjs",
@@ -69,11 +74,6 @@
       "path": "src/pages/Attribution.tsx",
       "sizeBytes": 14503,
       "sizeKB": "14.16 KB"
-    },
-    {
-      "path": "node_modules/recharts/es6/chart/RechartsWrapper.js",
-      "sizeBytes": 14013,
-      "sizeKB": "13.68 KB"
     }
   ],
   "packages": [
@@ -89,8 +89,8 @@
     },
     {
       "package": "src",
-      "sizeBytes": 207764,
-      "sizeKB": "202.89 KB"
+      "sizeBytes": 228226,
+      "sizeKB": "222.88 KB"
     },
     {
       "package": "react-router",
@@ -104,8 +104,8 @@
     },
     {
       "package": "lucide-react",
-      "sizeBytes": 29248,
-      "sizeKB": "28.56 KB"
+      "sizeBytes": 31399,
+      "sizeKB": "30.66 KB"
     },
     {
       "package": "d3-scale",

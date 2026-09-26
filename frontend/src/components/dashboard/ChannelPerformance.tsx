@@ -16,6 +16,7 @@ import { ChannelAnalytics } from '@/types/analytics';
 import { getChannels } from '@/services/api';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
+import { formatINR } from '@/utils/currency';
 
 interface ChannelPerformanceProps {
   initialData?: ChannelAnalytics[];
@@ -29,13 +30,13 @@ export const ChannelPerformance: React.FC<ChannelPerformanceProps> = ({
   loading: parentLoading,
 }) => {
   const [data, setData] = useState<ChannelAnalytics[]>(initialData || []);
-  const [loading, setLoading] = useState(initialData ? false : true);
+  const [internalLoading, setInternalLoading] = useState(!initialData || initialData.length === 0);
   const [error, setError] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>('revenue');
   const [sortAsc, setSortAsc] = useState(false);
 
   const fetchChannels = async () => {
-    setLoading(true);
+    setInternalLoading(true);
     setError(null);
     try {
       const res = await getChannels();
@@ -43,12 +44,15 @@ export const ChannelPerformance: React.FC<ChannelPerformanceProps> = ({
     } catch (err: any) {
       setError(err.message || 'Failed to fetch channel performance');
     } finally {
-      setLoading(false);
+      setInternalLoading(false);
     }
   };
 
+  // Synchronize state whenever parent passes or updates initialData
   useEffect(() => {
-    if (!initialData) {
+    if (initialData !== undefined) {
+      setData(initialData);
+    } else {
       fetchChannels();
     }
   }, [initialData]);
@@ -58,6 +62,8 @@ export const ChannelPerformance: React.FC<ChannelPerformanceProps> = ({
     window.addEventListener('journeyiq:refresh', onRefresh);
     return () => window.removeEventListener('journeyiq:refresh', onRefresh);
   }, []);
+
+  const isLoading = parentLoading !== undefined ? parentLoading : internalLoading;
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -106,7 +112,7 @@ export const ChannelPerformance: React.FC<ChannelPerformanceProps> = ({
       </div>
 
       {/* Table Content */}
-      {loading || parentLoading ? (
+      {isLoading && data.length === 0 ? (
         <div className="space-y-3 pt-2">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-12 w-full rounded-xl" />
@@ -115,6 +121,10 @@ export const ChannelPerformance: React.FC<ChannelPerformanceProps> = ({
       ) : error ? (
         <div className="p-6 text-center text-xs text-red-500 bg-red-50 rounded-2xl border border-red-200">
           {error}
+        </div>
+      ) : data.length === 0 ? (
+        <div className="p-8 text-center text-sm text-gray-500 bg-gray-50 rounded-2xl border border-gray-100">
+          No channel metrics recorded yet.
         </div>
       ) : (
         <div className="overflow-x-auto -mx-6 md:-mx-8 px-6 md:px-8">
@@ -218,7 +228,7 @@ export const ChannelPerformance: React.FC<ChannelPerformanceProps> = ({
                     <td className="py-3.5 px-3 text-right">
                       <div className="flex flex-col items-end gap-1">
                         <span className="font-mono font-bold text-graphite-950 text-sm">
-                          ${item.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                          {formatINR(item.revenue)}
                         </span>
                         {/* Mini bar for quick visual comparative ratio */}
                         <div className="w-24 bg-gray-100 h-1.5 rounded-full overflow-hidden">

@@ -17,7 +17,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.services.journey_service import build_journey, JourneyEvent
+from app.services.journey_service import build_journey, JourneyEvent, CustomerProfile
 
 client = TestClient(app)
 
@@ -152,3 +152,41 @@ class TestJourneySummaryEndpoint:
         with patch("app.main.get_customer_journey", return_value=journey):
             r = client.get("/api/customers/cust-endpoint-test/journey/summary")
         assert r.json()["channels"] == ["Instagram", "Email"]
+
+
+class TestListCustomersEndpoint:
+    """Tests for GET /api/customers endpoint."""
+
+    def test_list_customers_success(self):
+        sample_customers = [
+            CustomerProfile(
+                customer_id="cust-101",
+                first_seen=BASE_TS,
+                converted=True,
+                conversion_revenue=150.0,
+                event_count=5,
+            ),
+            CustomerProfile(
+                customer_id="cust-102",
+                first_seen=BASE_TS,
+                converted=False,
+                conversion_revenue=0.0,
+                event_count=2,
+            ),
+        ]
+        with patch("app.main.fetch_customers_list", return_value=sample_customers):
+            r = client.get("/api/customers?limit=10")
+        assert r.status_code == 200
+        data = r.json()
+        assert len(data) == 2
+        assert data[0]["customer_id"] == "cust-101"
+        assert data[0]["converted"] is True
+        assert data[0]["conversion_revenue"] == 150.0
+        assert data[1]["converted"] is False
+
+    def test_list_customers_with_filters(self):
+        with patch("app.main.fetch_customers_list", return_value=[]) as mock_fetch:
+            r = client.get("/api/customers?search=test&converted=true&limit=25")
+            assert r.status_code == 200
+            assert mock_fetch.called
+

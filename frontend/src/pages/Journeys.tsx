@@ -12,7 +12,7 @@ import {
   ArrowRight,
   Sparkles,
   TrendingUp,
-  DollarSign,
+  IndianRupee,
   Users,
   Compass,
   Award,
@@ -27,6 +27,7 @@ import { getJourneyPatterns } from '@/services/api';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
 import { CustomerJourneyFlow } from '@/components/dashboard/CustomerJourneyFlow';
+import { formatINR } from '@/utils/currency';
 
 type SortOption = 'revenue' | 'conversion_rate' | 'customers' | 'touchpoints';
 
@@ -194,13 +195,13 @@ export const Journeys: React.FC = () => {
               <span className="text-[11px] font-mono uppercase font-bold tracking-wider">
                 Total Path Revenue
               </span>
-              <DollarSign className="w-4 h-4 text-coral-500" aria-hidden="true" />
+              <IndianRupee className="w-4 h-4 text-coral-500" aria-hidden="true" />
             </div>
             <div className="text-2xl font-bold font-display text-coral-600">
-              ${kpis.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {formatINR(kpis.totalRevenue)}
             </div>
             <div className="text-[11px] text-gray-500 mt-1">
-              avg <span className="font-semibold text-graphite-700">${(kpis.totalRevenue / (kpis.totalConversions || 1)).toFixed(2)}</span> / conversion
+              avg <span className="font-semibold text-graphite-700">{formatINR(kpis.totalRevenue / (kpis.totalConversions || 1))}</span> / conversion
             </div>
           </div>
 
@@ -217,7 +218,7 @@ export const Journeys: React.FC = () => {
             </div>
             <div className="text-[11px] text-gray-500 mt-1 flex items-center justify-between">
               <span>Conv: <strong className="text-emerald-600">{((kpis.bestConverting?.conversion_rate ?? 0) * 100).toFixed(1)}%</strong></span>
-              <span className="font-mono font-semibold text-graphite-700">${kpis.bestConverting?.revenue.toFixed(2)}</span>
+              <span className="font-mono font-semibold text-graphite-700">{formatINR(kpis.bestConverting?.revenue ?? 0)}</span>
             </div>
           </div>
         </div>
@@ -424,7 +425,7 @@ export const Journeys: React.FC = () => {
                         Revenue
                       </div>
                       <div className="text-base font-mono font-extrabold text-coral-600 mt-0.5">
-                        ${pattern.revenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {formatINR(pattern.revenue)}
                       </div>
                     </div>
                   </div>

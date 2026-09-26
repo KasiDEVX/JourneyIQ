@@ -8,7 +8,7 @@ export const JourneyFlow: React.FC = () => {
     { name: 'Engagement', events: '725 events', type: 'Product Views', pct: '55.5%', drop: '-44.5%' },
     { name: 'Consideration', events: '246 events', type: 'Add to Cart', pct: '18.8%', drop: '-36.7%' },
     { name: 'Decision', events: '90 events', type: 'Checkout Started', pct: '6.9%', drop: '-11.9%' },
-    { name: 'Conversion', events: '28 orders', type: 'Purchases ($2.39k)', pct: '2.1%', drop: '-4.8%', isFinal: true },
+    { name: 'Conversion', events: '28 orders', type: 'Purchases (₹2.39k)', pct: '2.1%', drop: '-4.8%', isFinal: true },
   ];
 
   return (

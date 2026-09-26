@@ -25,6 +25,7 @@ WHAT THIS MODULE DOES
 """
 
 import logging
+import re
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
@@ -131,6 +132,18 @@ class JourneySummary(BaseModel):
     touchpoint_count:         int
     unique_channel_count:     int
     channels:                 list[str]
+
+
+class CustomerProfile(BaseModel):
+    """
+    Summary representation of a customer for list views.
+    Returned by GET /api/customers.
+    """
+    customer_id:              str
+    first_seen:               datetime
+    converted:                bool
+    conversion_revenue:       Optional[float] = None
+    event_count:              int = 0
 
 
 # =============================================================================
@@ -526,3 +539,65 @@ def get_customer_journey(customer_id: str, db) -> Optional[CustomerJourney]:
         events         = events,
         conversion_row = conversion,
     )
+
+
+def fetch_customers_list(
+    db,
+    limit: int = 50,
+    search: Optional[str] = None,
+    converted: Optional[bool] = None,
+) -> list[CustomerProfile]:
+    """
+    Fetch a paginated list of customers with conversion status and event count.
+    Supports filtering by search query (customer_id substring) and conversion state.
+    """
+    where_clauses = []
+    params: dict = {"limit": limit}
+
+    if search:
+        clean_search = re.sub(r"[^a-zA-Z0-9\-]", "", search.strip())
+        if clean_search:
+            where_clauses.append("LOWER(c.customer_id) LIKE :search")
+            params["search"] = f"%{clean_search.lower()}%"
+
+    if converted is True:
+        where_clauses.append("conv.customer_id IS NOT NULL")
+    elif converted is False:
+        where_clauses.append("conv.customer_id IS NULL")
+
+    where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
+    sql = text(f"""
+        SELECT 
+            c.customer_id, 
+            c.first_seen,
+            CASE WHEN conv.customer_id IS NOT NULL THEN 1 ELSE 0 END as converted,
+            conv.revenue as conversion_revenue,
+            COUNT(e.timestamp) as event_count
+        FROM customers c
+        LEFT JOIN conversions conv ON c.customer_id = conv.customer_id
+        LEFT JOIN events e ON c.customer_id = e.customer_id
+        {where_sql}
+        GROUP BY c.customer_id, c.first_seen, conv.customer_id, conv.revenue
+        ORDER BY converted DESC, c.first_seen DESC
+        LIMIT :limit
+    """)
+
+    rows = db.execute(sql, params).fetchall()
+    result = []
+    for r in rows:
+        ts = r[1]
+        if isinstance(ts, str):
+            ts = datetime.fromisoformat(ts)
+        if hasattr(ts, "tzinfo") and ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+
+        result.append(CustomerProfile(
+            customer_id=r[0],
+            first_seen=ts,
+            converted=bool(r[2]),
+            conversion_revenue=float(r[3]) if r[3] is not None else None,
+            event_count=int(r[4]),
+        ))
+    return result
+

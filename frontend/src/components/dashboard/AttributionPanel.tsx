@@ -3,7 +3,7 @@ import {
   Sparkles,
   BarChart2,
   Percent,
-  DollarSign,
+  IndianRupee,
   Info,
   CheckCircle2,
 } from 'lucide-react';
@@ -15,6 +15,7 @@ import { getAttribution } from '@/services/api';
 import { AttributionChart } from '@/components/charts/AttributionChart';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
+import { formatINR } from '@/utils/currency';
 
 const MODELS: { key: AttributionModelType; label: string; desc: string }[] = [
   { key: 'linear', label: 'Linear', desc: 'Equal credit across all path touchpoints' },
@@ -84,7 +85,7 @@ export const AttributionPanel: React.FC = () => {
                 : 'text-gray-500 hover:text-graphite-700'
             }`}
           >
-            <DollarSign className="w-3.5 h-3.5 text-coral-500" />
+            <IndianRupee className="w-3.5 h-3.5 text-coral-500" />
             <span>Attributed Rev</span>
           </button>
           <button
@@ -132,7 +133,7 @@ export const AttributionPanel: React.FC = () => {
         <div className="font-mono text-gray-500 font-medium">
           Total Attributed:{' '}
           <span className="font-bold text-graphite-900">
-            ${data ? data.total_revenue.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '0.00'}
+            {data ? formatINR(data.total_revenue) : '₹0.00'}
           </span>
         </div>
       </div>
@@ -189,7 +190,7 @@ export const AttributionPanel: React.FC = () => {
                     </div>
                     <div className="text-right shrink-0">
                       <div className="font-mono font-bold text-graphite-900">
-                        ${ch.attributed_revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        {formatINR(ch.attributed_revenue)}
                       </div>
                       <div className="text-[11px] font-mono text-emerald-600 font-semibold">
                         {percentage}%

@@ -4,6 +4,7 @@ import { JourneyPattern } from '@/types/analytics';
 import { getJourneyPatterns } from '@/services/api';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Badge } from '@/components/ui/Badge';
+import { formatINR } from '@/utils/currency';
 
 interface JourneyPatternsProps {
   initialData?: JourneyPattern[];
@@ -166,7 +167,7 @@ export const JourneyPatterns: React.FC<JourneyPatternsProps> = ({
                       Revenue
                     </div>
                     <div className="text-sm font-mono font-extrabold text-coral-600">
-                      ${pattern.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {formatINR(pattern.revenue)}
                     </div>
                   </div>
                 </div>

@@ -9,6 +9,7 @@ import {
   Cell,
 } from 'recharts';
 import { AttributionChannel } from '@/types/analytics';
+import { formatINR } from '@/utils/currency';
 
 interface AttributionChartProps {
   channels: AttributionChannel[];
@@ -46,7 +47,7 @@ export const AttributionChart: React.FC<AttributionChartProps> = ({
           <div className="flex items-center justify-between gap-4 text-gray-300">
             <span>Attributed Rev:</span>
             <span className="font-mono font-bold text-coral-400">
-              ${item.revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {formatINR(item.revenue)}
             </span>
           </div>
           <div className="flex items-center justify-between gap-4 text-gray-400">
@@ -69,7 +70,7 @@ export const AttributionChart: React.FC<AttributionChartProps> = ({
         >
           <XAxis
             type="number"
-            tickFormatter={(val) => (mode === 'revenue' ? `$${val}` : `${val}%`)}
+            tickFormatter={(val) => (mode === 'revenue' ? `₹${val}` : `${val}%`)}
             stroke="#94A3B8"
             fontSize={11}
             tickLine={false}

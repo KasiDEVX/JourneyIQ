@@ -8,7 +8,8 @@ import {
   Tooltip,
   Cell,
 } from 'recharts';
-import { Layers, DollarSign, TrendingUp, Users } from 'lucide-react';
+import { Layers, IndianRupee, TrendingUp, Users } from 'lucide-react';
+import { formatINR } from '@/utils/currency';
 import { ChannelAnalytics } from '@/types/analytics';
 import { getChannels } from '@/services/api';
 import { ChannelPerformance } from '@/components/dashboard/ChannelPerformance';
@@ -23,6 +24,7 @@ export const Channels: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
+      setError(null);
       try {
         const res = await getChannels();
         setData(res);
@@ -33,6 +35,10 @@ export const Channels: React.FC = () => {
       }
     };
     load();
+
+    const onRefresh = () => load();
+    window.addEventListener('journeyiq:refresh', onRefresh);
+    return () => window.removeEventListener('journeyiq:refresh', onRefresh);
   }, []);
 
   const revenueChartData = data.slice(0, 8).map((c) => ({
@@ -68,7 +74,7 @@ export const Channels: React.FC = () => {
               <p className="text-xs text-gray-400">Total gross value from channel interactions</p>
             </div>
             <div className="w-7 h-7 rounded-lg bg-coral-50 text-coral-500 flex items-center justify-center">
-              <DollarSign className="w-4 h-4" />
+              <IndianRupee className="w-4 h-4" />
             </div>
           </div>
 
@@ -91,10 +97,10 @@ export const Channels: React.FC = () => {
                     stroke="#94A3B8"
                     fontSize={11}
                     tickLine={false}
-                    tickFormatter={(v) => `$${v}`}
+                    tickFormatter={(v) => `₹${v}`}
                   />
                   <Tooltip
-                    formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Revenue']}
+                    formatter={(value: any) => [formatINR(Number(value)), 'Revenue']}
                     contentStyle={{
                       backgroundColor: '#0F172A',
                       borderColor: '#1E293B',

@@ -30,6 +30,7 @@ import re
 import sys
 import time
 import uuid
+from typing import Optional
 from pathlib import Path
 
 # Ensure backend/ and project root are on sys.path so all import styles
@@ -57,7 +58,9 @@ from app.database import (
 from app.services.journey_service import (
     CustomerJourney,
     JourneySummary,
+    CustomerProfile,
     get_customer_journey,
+    fetch_customers_list,
 )
 from app.services.analytics import (
     OverviewAnalytics,
@@ -270,7 +273,25 @@ def readiness_check():
     )
 
 
-# ── Journey endpoints ─────────────────────────────────────────────────────────
+# ── Journey & Customer endpoints ─────────────────────────────────────────────
+
+@app.get(
+    "/api/customers",
+    response_model=list[CustomerProfile],
+    tags=["Customers"],
+    summary="List customer profiles",
+    description="Returns customer records with conversion status, revenue, and event counts.",
+)
+def list_customers(
+    limit: int = Query(50, ge=1, le=500),
+    search: Optional[str] = Query(None),
+    converted: Optional[bool] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """List customer records with conversion status, revenue, and event counts."""
+    logger.info("GET /api/customers limit=%d search=%s converted=%s", limit, search, converted)
+    return fetch_customers_list(db, limit=limit, search=search, converted=converted)
+
 
 @app.get(
     "/api/customers/{customer_id}/journey",

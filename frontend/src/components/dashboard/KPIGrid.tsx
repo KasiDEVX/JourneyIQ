@@ -1,8 +1,9 @@
 import React from 'react';
-import { Users, Layers, ShoppingBag, DollarSign, Clock, GitMerge, Radio, Activity } from 'lucide-react';
+import { Users, Layers, ShoppingBag, IndianRupee, Clock, GitMerge, Radio, Activity } from 'lucide-react';
 import { OverviewAnalytics } from '@/types/analytics';
 import { KPICard } from './KPICard';
 import { CardSkeleton } from '@/components/ui/Skeleton';
+import { formatINR } from '@/utils/currency';
 
 interface KPIGridProps {
   data: OverviewAnalytics | null;
@@ -21,13 +22,7 @@ export const KPIGrid: React.FC<KPIGridProps> = ({ data, loading }) => {
     );
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) => formatINR(amount);
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('en-US').format(num);
@@ -66,7 +61,7 @@ export const KPIGrid: React.FC<KPIGridProps> = ({ data, loading }) => {
           value={formatCurrency(data.total_revenue)}
           subtitle={`AOV ${formatCurrency(data.average_order_value)}`}
           badge={{ text: 'Attributable', variant: 'coral' }}
-          icon={<DollarSign className="w-4 h-4" />}
+          icon={<IndianRupee className="w-4 h-4" />}
           accent={true}
         />
       </div>
